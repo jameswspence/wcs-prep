@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WCS Practice Exam — Pelvic & Women's Health PT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
+
+  :root {
+    --navy: #0f2240;
+    --navy-mid: #1a3a6b;
+    --gold: #c9a84c;
+    --cream: #faf7f2;
+    --cream-dark: #f0ebe0;
+    --red-wrong: #8b1a1a;
+    --green-right: #1a5c2e;
+    --text: #1a1a2e;
+    --text-mid: #3d3d5c;
+    --border: #d4c9b0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--navy);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .header-inner {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 34px 32px 26px;
+    position: relative;
+    z-index: 1;
+  }
+  .header-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Playfair Display', serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 5px;
+  }
+  header p { font-size: 0.88rem; color: rgba(255,255,255,0.6); font-style: italic; }
+  .header-circle {
+    position: absolute; right: -40px; top: -20px;
+    width: 240px; height: 240px; border-radius: 50%;
+    border: 36px solid rgba(201,168,76,0.09);
+    pointer-events: none;
+  }
+  .progress-wrap { background: rgba(0,0,0,0.3); height: 4px; }
+  .progress-fill { height: 4px; background: var(--gold); transition: width 0.5s ease; width: 0%; }
+
+  main { max-width: 920px; margin: 0 auto; padding: 30px 24px 64px; }
+
+  .score-strip { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+  .chip {
+    background: white; border: 1px solid var(--border); border-radius: 6px;
+    padding: 7px 16px; font-size: 0.76rem; color: var(--text-mid); letter-spacing: 0.3px;
+  }
+  .chip span {
+    font-family: 'Playfair Display', serif; font-size: 1.25rem;
+    font-weight: 700; display: block; color: var(--navy);
+  }
+  .chip.c span { color: var(--green-right); }
+  .chip.w span { color: var(--red-wrong); }
+
+  /* Background loading indicator */
+  .bg-load-strip {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 8px 14px;
+    background: rgba(201,168,76,0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(201,168,76,0.3);
+    font-size: 0.76rem;
+    color: var(--text-mid);
+    font-style: italic;
+  }
+  .bg-load-strip.active { display: flex; }
+  .mini-spinner {
+    width: 13px; height: 13px;
+    border: 2px solid var(--cream-dark);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  /* Screens */
+  #start-screen { }
+  #loading-screen { display:none; text-align:center; padding: 72px 20px; }
+  #quiz-screen { display:none; }
+  #results-screen { display:none; }
+  #error-screen { display:none; }
+
+  /* Start */
+  .start-card {
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    padding: 44px 44px; max-width: 660px; margin: 0 auto; text-align: center;
+    box-shadow: 0 4px 28px rgba(15,34,64,0.07);
+  }
+  .start-card h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.65rem;
+    color: var(--navy); margin-bottom: 10px;
+  }
+  .start-card p { font-size: 0.9rem; color: var(--text-mid); line-height: 1.7; margin-bottom: 8px; }
+  .info-pills { display:flex; justify-content:center; gap:8px; margin: 20px 0 10px; flex-wrap:wrap; }
+  .pill {
+    background: var(--cream-dark); border-radius: 20px; padding: 5px 14px;
+    font-size: 0.78rem; color: var(--navy); font-weight: 600;
+  }
+  .topic-label {
+    font-size: 0.82rem; color: var(--text-mid); margin: 18px 0 10px;
+    text-align: left; font-style: italic;
+  }
+  .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 26px; text-align:left; }
+  .t-btn {
+    background: var(--cream); border: 1.5px solid var(--border); border-radius: 6px;
+    padding: 8px 13px; font-family: 'Source Serif 4', serif; font-size: 0.79rem;
+    color: var(--text-mid); cursor: pointer; transition: all 0.14s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .t-btn:hover { border-color: var(--navy-mid); background: white; }
+  .t-btn.active { border-color: var(--navy); background: rgba(15,34,64,0.06); color: var(--navy); font-weight:600; }
+  .t-dot { width:7px; height:7px; border-radius:50%; background: var(--border); flex-shrink:0; transition:background 0.14s; }
+  .t-btn.active .t-dot { background: var(--gold); }
+
+  /* Loading */
+  .spinner {
+    width:46px; height:46px; border:4px solid var(--cream-dark);
+    border-top-color: var(--gold); border-radius:50%;
+    animation: spin 0.85s linear infinite; margin: 0 auto 22px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #loading-screen h2 { font-family:'Playfair Display',serif; font-size:1.35rem; color:var(--navy); margin-bottom:7px; }
+  #loading-screen p { font-size:0.88rem; color:var(--text-mid); font-style:italic; }
+  .loading-steps { margin-top: 24px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto; }
+  .load-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 0; font-size: 0.82rem; color: var(--text-mid);
+    border-bottom: 1px solid var(--border);
+    transition: color 0.3s;
+  }
+  .load-step:last-child { border-bottom: none; }
+  .step-icon { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+  .step-mini-spin {
+    width: 14px; height: 14px; border: 2px solid var(--cream-dark);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  .step-check { color: var(--green-right); font-size: 13px; font-weight: 700; }
+  .load-step.done { color: var(--green-right); }
+  .load-step.active { color: var(--navy); font-weight: 600; }
+
+  /* Question card */
+  .q-card {
+    background: white; border: 1px solid var(--border); border-radius: 12px;
+    padding: 30px 36px; box-shadow: 0 2px 18px rgba(15,34,64,0.06);
+    animation: fadeUp 0.38s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+  .case-box {
+    background: #f4f0e8; border-left: 3px solid var(--gold);
+    border-radius: 0 6px 6px 0; padding: 14px 18px;
+    margin-bottom: 20px; font-size: 0.875rem; line-height: 1.72;
+    color: #2a2a3e;
+  }
+  .case-label {
+    font-family: 'Playfair Display', serif; font-size: 0.72rem;
+    font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 7px; display: block;
+  }
+
+  .q-meta { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:7px; }
+  .q-num { font-family:'Playfair Display',serif; font-size:0.76rem; letter-spacing:2px; text-transform:uppercase; color:var(--gold); font-weight:600; }
+  .q-domain { font-size:0.7rem; background:var(--cream-dark); color:var(--text-mid); padding:3px 10px; border-radius:20px; }
+
+  .q-text { font-size:1.03rem; line-height:1.75; color:var(--text); margin-bottom:22px; }
+
+  .options { display:flex; flex-direction:column; gap:9px; }
+  .opt {
+    background: var(--cream); border: 1.5px solid var(--border); border-radius: 7px;
+    padding: 12px 15px; text-align:left; cursor:pointer;
+    font-family:'Source Serif 4',serif; font-size:0.9rem; line-height:1.52;
+    color:var(--text); display:flex; gap:11px; align-items:flex-start;
+    transition: border-color 0.13s, background 0.13s, transform 0.1s;
+  }
+  .opt:hover:not(:disabled) { border-color:var(--navy-mid); background:white; transform:translateX(3px); }
+  .opt .ltr {
+    flex-shrink:0; width:21px; height:21px; border-radius:50%; background:var(--border);
+    color:var(--navy); font-size:0.7rem; font-weight:700; font-family:'Playfair Display',serif;
+    display:flex; align-items:center; justify-content:center; margin-top:1px;
+    transition: background 0.13s, color 0.13s;
+  }
+  .opt:hover:not(:disabled) .ltr { background:var(--navy); color:white; }
+  .opt.sel { border-color:var(--navy-mid); background:rgba(26,58,107,0.05); }
+  .opt.sel .ltr { background:var(--navy); color:white; }
+  .opt.right { border-color:var(--green-right); background:rgba(26,92,46,0.07); }
+  .opt.right .ltr { background:var(--green-right); color:white; }
+  .opt.wrong { border-color:var(--red-wrong); background:rgba(139,26,26,0.06); }
+  .opt.wrong .ltr { background:var(--red-wrong); color:white; }
+  .opt:disabled { cursor:default; transform:none; }
+
+  .feedback { margin-top:18px; border-radius:8px; padding:16px 18px; font-size:0.865rem; line-height:1.68; display:none; animation:fadeUp 0.28s ease; }
+  .feedback.fb-right { background:rgba(26,92,46,0.07); border-left:4px solid var(--green-right); color:#1a3d23; display:block; }
+  .feedback.fb-wrong { background:rgba(139,26,26,0.06); border-left:4px solid var(--red-wrong); color:#3d1010; display:block; }
+  .feedback strong { display:block; margin-bottom:7px; font-size:0.9rem; }
+  .fb-ref { margin-top:9px; padding-top:9px; border-top:1px solid rgba(0,0,0,0.1); font-style:italic; font-size:0.8rem; opacity:0.85; }
+
+  /* Next question loading notice */
+  .next-loading {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    color: var(--text-mid);
+    font-style: italic;
+    margin-top: 6px;
+  }
+  .next-loading.show { display: flex; }
+
+  .btn-row { display:flex; justify-content:space-between; align-items:center; margin-top:24px; flex-wrap:wrap; gap:10px; }
+  .btn-hint { font-size:0.78rem; color:var(--text-mid); font-style:italic; }
+  .btn-sub, .btn-nxt, .btn-start, .btn-restart {
+    padding:11px 26px; border-radius:6px; font-family:'Playfair Display',serif;
+    font-size:0.93rem; font-weight:600; cursor:pointer; border:none;
+    transition: opacity 0.13s, transform 0.1s;
+  }
+  .btn-sub, .btn-start, .btn-restart { background:var(--navy); color:white; }
+  .btn-nxt { background:var(--gold); color:var(--navy); }
+  .btn-sub:disabled { opacity:0.35; cursor:default; transform:none; }
+  .btn-nxt:disabled { opacity:0.5; cursor:wait; transform:none; }
+  .btn-sub:not(:disabled):hover, .btn-start:hover, .btn-restart:hover { opacity:0.88; transform:translateY(-1px); }
+  .btn-nxt:not(:disabled):hover { opacity:0.9; transform:translateY(-1px); }
+  .divider { border:none; border-top:1px solid var(--border); margin:20px 0; }
+
+  /* Results */
+  .results-card {
+    background:white; border:1px solid var(--border); border-radius:12px;
+    padding:42px 46px; text-align:center;
+    box-shadow:0 4px 28px rgba(15,34,64,0.08); animation:fadeUp 0.5s ease;
+  }
+  .big-pct { font-family:'Playfair Display',serif; font-size:5.2rem; font-weight:700; color:var(--navy); line-height:1; margin:14px 0 5px; }
+  .pct-sub { font-size:0.88rem; color:var(--text-mid); font-style:italic; margin-bottom:26px; }
+  .res-grid { display:flex; justify-content:center; gap:18px; margin-bottom:28px; flex-wrap:wrap; }
+  .res-stat { background:var(--cream); border-radius:8px; padding:14px 24px; min-width:88px; }
+  .res-num { font-family:'Playfair Display',serif; font-size:2.1rem; font-weight:700; display:block; color:var(--navy); }
+  .res-num.g { color:var(--green-right); }
+  .res-num.r { color:var(--red-wrong); }
+  .res-lbl { font-size:0.76rem; color:var(--text-mid); letter-spacing:0.3px; }
+  .dom-wrap { text-align:left; margin-bottom:26px; }
+  .dom-wrap h3 { font-family:'Playfair Display',serif; font-size:0.92rem; color:var(--navy); margin-bottom:12px; border-bottom:1px solid var(--border); padding-bottom:7px; }
+  .dom-row { display:flex; align-items:center; gap:9px; margin-bottom:7px; font-size:0.81rem; }
+  .dom-name { flex:1; color:var(--text-mid); }
+  .dom-bar-bg { flex:2; height:5px; background:var(--cream-dark); border-radius:3px; overflow:hidden; }
+  .dom-bar { height:100%; border-radius:3px; background:var(--gold); }
+  .dom-pct { width:30px; text-align:right; font-weight:600; color:var(--navy); font-size:0.8rem; }
+
+  .error-card {
+    background:white; border:1px solid var(--border); border-radius:12px;
+    padding:30px 34px; max-width:580px; margin:0 auto;
+    box-shadow:0 4px 18px rgba(15,34,64,0.07);
+  }
+  .error-card h3 { font-family:'Playfair Display',serif; color:var(--red-wrong); margin-bottom:9px; }
+  .error-card p { font-size:0.88rem; color:var(--text-mid); line-height:1.7; margin-bottom:14px; }
+  .err-detail {
+    background:#fff3f3; border:1px solid #f0c0c0; border-radius:5px;
+    padding:10px 14px; font-size:0.78rem; color:#5a1a1a; font-family:monospace;
+    margin-bottom:18px; white-space:pre-wrap; word-break:break-all; max-height:120px; overflow-y:auto;
+  }
+
+  @media(max-width:600px){
+    header h1{font-size:1.35rem;}
+    .q-card,.start-card,.results-card{padding:20px 16px;}
+    .big-pct{font-size:3.5rem!important;}
+    .topic-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-circle"></div>
+  <div class="header-inner">
+    <div class="header-badge">ABPTS Board Prep · AI-Powered</div>
+    <h1>Women's Health Clinical Specialist</h1>
+    <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
+  </div>
+  <div class="progress-wrap"><div class="progress-fill" id="prog"></div></div>
+</header>
+
+<main>
+
+  <!-- START -->
+  <div id="start-screen">
+    <div class="start-card">
+      <h2>WCS Practice Exam</h2>
+      <p>Each session generates <strong>5 fresh case-based questions</strong> styled after the 2025 WCS Study Tool — named patient vignettes, clinical detail, and evidence-referenced rationale.</p>
+      <div class="info-pills">
+        <div class="pill">5 Questions / Session</div>
+        <div class="pill">Case Vignette Format</div>
+        <div class="pill">AI-Generated · No Repeats</div>
+        <div class="pill">Cited Rationale</div>
+      </div>
+      <p class="topic-label">Focus on a specific domain (optional):</p>
+      <div class="topic-grid" id="topic-grid">
+        <button class="t-btn active" data-topic="mixed" onclick="setTopic(this)"><span class="t-dot"></span>Mixed — All Domains</button>
+        <button class="t-btn" data-topic="Male Pelvic Floor dysfunction and post-prostatectomy rehabilitation" onclick="setTopic(this)"><span class="t-dot"></span>Male Pelvic Floor</button>
+        <button class="t-btn" data-topic="Chronic pelvic pain, endometriosis, and interstitial cystitis" onclick="setTopic(this)"><span class="t-dot"></span>Pelvic Pain / IC / Endo</button>
+        <button class="t-btn" data-topic="Vulvodynia, vaginismus, and provoked vestibulodynia" onclick="setTopic(this)"><span class="t-dot"></span>Vulvodynia / Vaginismus</button>
+        <button class="t-btn" data-topic="Pelvic organ prolapse assessment and management" onclick="setTopic(this)"><span class="t-dot"></span>Pelvic Organ Prolapse</button>
+        <button class="t-btn" data-topic="Urinary dysfunction including stress, urge, and mixed incontinence" onclick="setTopic(this)"><span class="t-dot"></span>Urinary Dysfunction</button>
+        <button class="t-btn" data-topic="Bowel dysfunction, functional constipation, and fecal incontinence" onclick="setTopic(this)"><span class="t-dot"></span>Bowel Dysfunction</button>
+        <button class="t-btn" data-topic="Female athlete issues and relative energy deficiency in sport" onclick="setTopic(this)"><span class="t-dot"></span>Female Athlete / RED-S</button>
+        <button class="t-btn" data-topic="Bone health and osteoporosis management" onclick="setTopic(this)"><span class="t-dot"></span>Bone Health</button>
+        <button class="t-btn" data-topic="Lymphedema and oncology rehabilitation including breast cancer" onclick="setTopic(this)"><span class="t-dot"></span>Lymphedema / Oncology</button>
+        <button class="t-btn" data-topic="Pregnancy-related pain, pelvic girdle pain, and labor considerations" onclick="setTopic(this)"><span class="t-dot"></span>Pregnancy / Labor / PGP</button>
+        <button class="t-btn" data-topic="Menopause, fibromyalgia, and clinical practice guidelines" onclick="setTopic(this)"><span class="t-dot"></span>Menopause / Fibromyalgia</button>
+        <button class="t-btn" data-topic="APTA Code of Ethics, professional behavior, legal standards, informed consent, mandatory reporting, documentation, delegation, cultural competence, and scope of practice" onclick="setTopic(this)"><span class="t-dot"></span>⚖ Ethics &amp; Professional Practice</button>
+      </div>
+      <button class="btn-start" onclick="startExam()">Generate Exam Session</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading-screen">
+    <div class="spinner"></div>
+    <h2>Building Your Exam</h2>
+    <p>First questions ready in seconds — remaining build in background</p>
+    <div class="loading-steps" id="load-steps">
+      <div class="load-step" id="step-0"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 1</div>
+      <div class="load-step" id="step-1"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 2</div>
+      <div class="load-step" id="step-2"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 3</div>
+      <div class="load-step" id="step-3"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 4</div>
+      <div class="load-step" id="step-4"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 5</div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen">
+    <div class="score-strip">
+      <div class="chip">Question <span id="chip-n">1</span> of <span id="chip-tot">5</span></div>
+      <div class="chip c">Correct <span id="chip-c">0</span></div>
+      <div class="chip w">Incorrect <span id="chip-w">0</span></div>
+      <div class="chip">Score <span id="chip-pct">—</span></div>
+    </div>
+
+    <div class="bg-load-strip" id="bg-strip">
+      <div class="mini-spinner"></div>
+      <span id="bg-strip-txt">Generating remaining questions in background…</span>
+    </div>
+
+    <div class="q-card" id="q-card">
+      <div class="q-meta">
+        <div class="q-num" id="q-num-lbl">Question 1</div>
+        <div class="q-domain" id="q-domain-lbl">—</div>
+      </div>
+      <div id="case-vignette"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="opts"></div>
+      <div class="feedback" id="fb"></div>
+      <hr class="divider">
+      <div class="btn-row">
+        <div class="btn-hint">Select the single <strong>best</strong> answer, then submit.</div>
+        <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-sub" id="btn-sub" onclick="submitAnswer()" disabled>Submit Answer</button>
+          <button class="btn-nxt" id="btn-nxt" onclick="nextQ()" style="display:none;">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-screen">
+    <div class="results-card">
+      <div class="header-badge" style="background:var(--navy);color:var(--gold);">Session Complete</div>
+      <div class="big-pct" id="r-pct">—</div>
+      <div class="pct-sub" id="r-sub">—</div>
+      <div class="res-grid">
+        <div class="res-stat"><span class="res-num g" id="r-c">0</span><div class="res-lbl">Correct</div></div>
+        <div class="res-stat"><span class="res-num r" id="r-w">0</span><div class="res-lbl">Incorrect</div></div>
+        <div class="res-stat"><span class="res-num" id="r-t">5</span><div class="res-lbl">Total</div></div>
+      </div>
+      <div class="dom-wrap" id="dom-wrap"></div>
+      <button class="btn-restart" onclick="goHome()">New Session</button>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="error-screen">
+    <div class="error-card">
+      <h3>⚠ Generation Error</h3>
+      <p>The AI question generator hit an error. This is usually a temporary API timeout. Please try again — a fresh set of questions will be generated.</p>
+      <div class="err-detail" id="err-txt"></div>
+      <button class="btn-restart" onclick="goHome()">Try Again</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// PATIENT NAME POOL — large, culturally diverse, randomized each session
+// ═══════════════════════════════════════════════════════════════════════
+const PATIENT_NAMES = [
+  // Female patients
+  "Maura","Sigrid","Saidah","Zuri","Jina","Kat","Sari","Cari","Devon","Priya",
+  "Amara","Leila","Ingrid","Fatima","Yuki","Celeste","Niamh","Rosamund","Thalia","Esme",
+  "Kofi","Adaeze","Miriam","Solange","Beatrix","Chiara","Nadia","Luz","Aoife","Wren",
+  "Simone","Odessa","Patience","Isadora","Maren","Tamsin","Yemi","Brie","Dahlia","Seun",
+  "Margot","Zinnia","Anika","Tova","Paloma","Kezia","Brynn","Orla","Vesna","Fiona",
+  // Male patients
+  "Marcus","Rigo","Max","Devon","Tobias","Kwame","Soren","Elio","Dario","Oisin",
+  "Rafael","Kolade","Brendan","Tariq","Stellan","Emeka","Pax","Declan","Yusuf","Nico",
+  // PT clinician names
+  "Dr. Chen","Dr. Osei","Dr. Vasquez","Dr. Murphy","Dr. Tanaka","Dr. Abara",
+  "Dr. Lindqvist","Dr. Patel","Dr. Okafor","Dr. Reyes"
+];
+
+function getRandomName() {
+  return PATIENT_NAMES[Math.floor(Math.random() * PATIENT_NAMES.length)];
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ENRICHED SYSTEM PROMPT — v5 with full Drive content
+// ═══════════════════════════════════════════════════════════════════════
+const SYSTEM = `You are an expert question writer for the ABPTS Women's Health Clinical Specialist (WCS) board examination. You create board-style practice questions that exactly match the format and difficulty of the 2025 WCS Study Tool (Hersick et al., First Edition 2025).
+
+QUESTION FORMAT — FOLLOW EXACTLY:
+- Start with a realistic CASE VIGNETTE (2-5 sentences). The patient name will be provided to you — USE IT EXACTLY as given. Include age, relevant PMH, presentation, functional complaints, and objective findings as appropriate.
+- Then ask a focused clinical question about the case. The question stem should end with a bold-formatted cue word like MOST, BEST, OPTIMAL, MOST LIKELY, MOST ACCURATE, or EXCEPT.
+- Write exactly 4 answer options (A, B, C, D). Options should be full clinical sentences — not just one-word answers. Make 3 distractors plausible; one should be "almost correct" to test fine clinical discrimination.
+- The correct answer should vary position across questions (A, B, C, or D).
+
+=== BOWEL DYSFUNCTION KNOWLEDGE BASE ===
+ANATOMY: Rectum 15–20 cm from S3 to 2.5 cm below coccyx tip. Valves of Houston (superior, middle, inferior rectal folds). IAS = inner circular smooth muscle; provides 55% resting anal tone; innervated sympathetically L1–2 (hypogastric plexus) and parasympathetically S1–3 (pelvic plexus). EAS + puborectalis = 30% resting tone. Hemorrhoid plexus = 15%. Anorectal angle at rest = 90°; range 60–105°. Pectinate line = 1.5–2 cm above anal verge. Anoderm = highly sensitive, innervated by inferior rectal nerve.
+
+NERVE SUPPLY: Onuf's nucleus S1–S3 controls striated sphincter. Pudendal nerve S2–4 provides somatic supply. Sympathetics L1–3 via superior hypogastric plexus = speed/slow motility, facilitate sphincters. Parasympathetics S2–S4 via inferior hypogastric plexus = rest/digest, inhibitory (relax sphincters for defecation), facilitatory (propel stool). Pudendal nerve stretch threshold for damage = 15%; vaginal delivery stretches inferior rectal branches 35%, perineal branch 33%.
+
+CONTINENCE MECHANISMS: IAS = 55% resting pressure; EAS + puborectalis = 30%; hemorrhoid plexus = 15%. Puborectalis contracts simultaneously with EAS during cough/strain. PR decreases anorectal angle to kink off junction = continence. LA opens genital hiatus during defecation; PR closes it at rest.
+
+CONSTIPATION: Normal BM frequency = 3×/day to 3×/week. Bristol Type 3–4 easiest to pass. Rome III/IV criteria: ≥2 of — defecation <3×/week, straining >25% of time, lumpy/hard stool, sensation of incomplete evacuation, sensation of anorectal block, manual maneuvers; symptoms ≥3 months (first onset ≥6 months prior); loose stool rarely without laxatives. Prevalence: 12–19% of population; women 2× more likely. Dyssynergia underlies up to 40% of chronic constipation cases.
+
+DYSSYNERGIA: Paradoxical contraction of PFM/EAS during Valsalva. Failure of anorectal angle to increase. Pudendal nerve dysfunction. Habitual butt-gripping → puborectalis hypertrophy. Symptoms: small skinny stools, vaginal pressure with BM like rectocele, pain with BM/coccydynia/dyspareunia.
+
+FECAL INCONTINENCE: Prevalence 11–17%; equal between sexes; increases with age. IN TOP 5 reasons for nursing home placement. Risk factors: obstetric (vaginal delivery, OASI, 3rd/4th degree tears — 3× greater risk with prior ASI), male pelvic surgery/radiation, aging, dementia. ANAL SPHINCTER SEX DIFFERENCES: Females have shorter EAS; males have longer EAS. ASI triad: forceps + episiotomy + epidural.
+
+MS & BOWEL: Bowel dysfunction (constipation/FI) in 39–73% of MS patients. Spasticity of pelvic floor → failure of effacement of puborectalis. Patients may need digitation for evacuation. Rectal sensation impairment strongly correlated with FI in MS.
+
+PARKINSON'S & BOWEL: Gastroparesis interferes with levodopa absorption. Same neurodegeneration in brain also affects spinal cord and intestinal lining nerve cells. Anticholinergics may increase dyssynergia. Stimulant laxatives (Dulcolax) create dependence — last resort.
+
+GI TESTING: Anal manometry = resting/squeeze pressures, RAIR, identifies dyssynergia. Transit study (Sitz markers, wireless capsule) = normal 3–5 days; differentiates slow-transit vs outlet obstruction. Defecography = visualizes rectocele, enterocele, intussusception, anismus. Balloon expulsion test = abnormal if >2 min or unable to expel; confirms outlet obstruction/dyssynergia. Endoanal US = sphincter tear assessment. Colonoscopy = rules out structural pathology.
+
+PHARMACOLOGY: Bulking agents (psyllium), stool softeners (docusate), osmotic (PEG, Mg hydroxide), stimulants (senna, bisacodyl), antidiarrheal (loperamide). IBS-C: secretagogues (linaclotide, lubiprostone). IBS-D: rifaximin, bile acid binders. Antispasmodics (dicyclomine) for global IBS.
+
+OUTCOME TOOLS: Cleveland Clinic Constipation Score; Wexner Incontinence Score; IBS-QoL; Bristol Stool Form Scale; Patient diaries. Rome III/IV criteria for IBS diagnosis.
+
+=== LYMPHEDEMA KNOWLEDGE BASE ===
+ANATOMY: Lymphatic capillaries → pre-collectors → collectors (lymphangions with smooth muscle & valves) → lymph nodes (600–700 in adult) → trunks → major ducts → venous return. 2–4 liters return to circulation per 24 hours. Functional reserve: LTV can increase up to 10× normal.
+
+INSUFFICIENCY TYPES: Dynamic (high volume) = lymphatic load exceeds capacity (trauma, inflammation). Mechanical (low volume) = decreased transit capacity below normal load = LYMPHEDEMA. Combined = most severe; capacity below normal AND fluid volume elevated.
+
+STAGING: Stage 0 = latent, known lymphatic insult, no swelling. Stage 1 = pitting, reversible, swelling reduces overnight. Stage 2 = fibrotic, spontaneously irreversible, swelling does NOT reduce overnight. Late Stage 2 = more skin changes, may still pit but decreasing due to fibrosis. Stage 3 = elephantiasis; no pitting, papillomas, hyperkeratosis, lymphorrhea, infections.
+
+PRIMARY LYMPHEDEMA TYPES: Congenital (Milroy's disease = leg swelling in first year); Meige disease (lymphedema praecox = missing nodes/channels, affects lower body at puberty, most common 1/100,000, more common in females); Lymphedema tarda (develops after age 35, adults 40–60). Chronic primary → Stewart-Treves syndrome (angiosarcoma risk).
+
+SECONDARY LYMPHEDEMA: 90% of cases. Causes: surgery, radiation, trauma, infection, tumor, CHF, CVI. Lymphatic filariasis = leading cause worldwide (parasitic). CVI = second most common cause.
+
+DIAGNOSIS: History + physical exam + ruling out other causes. Duplex US to r/o DVT. Lymphoscintigraphy = gold standard but not required. Stemmer sign = inability to tent skin on dorsum of foot/hand = positive for lymphedema (high sensitivity, lower specificity). Bioimpedance spectroscopy (BIS) = detects subclinical lymphedema. Subclinical lymphedema = RVC 5–10%; Clinical = RVC >10%.
+
+SKIN CHANGES: Hyperkeratosis (thickening from keratin), papillomas (wart-like growths), lymphorrhea (amber protein-rich fluid leaking), atrophie blanche (white scar patches = poor circulation, ulcer risk). Cellulitis = 92% of lymphedema hospitalizations.
+
+CONTRAINDICATIONS TO CDT/COMPRESSION: Severe PAD (systolic ankle pressure <60 mmHg, toe pressure <30 mmHg, ABI <0.9), severe cardiac insufficiency, acute DVT (can bandage after anticoagulation), active cellulitis (combine with antibiotics), allergy to compression material, severe diabetic neuropathy with necrosis risk.
+
+CDT (Complete Decongestive Therapy) = gold standard: Phase 1 (intensive) = 5×/week, 3–8 weeks, MLD + gradient compression bandaging + exercise. Phase 2 (maintenance) = self-MLD, compression garments (replaced every 4–6 months), skin care. SHORT STRETCH BANDAGES = most effective (low resting pressure, high working pressure). Garments: flat-knit (custom) = maintains reduction ONLY; circular-knit = for mild lymphedema. Pumps (IPC) = controversial; removes water but leaves proteins; Grade B as adjunct only.
+
+MLD: Begin proximally then progress distally. Increases lymph pumping from 6–10×/min to 60–100×/min. If both LE affected: treat MORE affected side first.
+
+MEDICATIONS: Diuretics = INEFFECTIVE for lymphedema swelling. Coumadin (benzopyrone) = NOT recommended (liver toxicity). Emollients for hyperkeratosis. Antimicrobials for cellulitis.
+
+OUTCOME TOOLS: LLIS (Lymphedema Life Impact Scale) = 18-item; MCID = 7.31 points; target 8-point decrease. Lymph-ICF-LL for lower extremity. EORTC QLQ-C30 and FACT-HN for head/neck lymphedema.
+
+=== MALE PELVIC FLOOR KNOWLEDGE BASE ===
+ANATOMY — LAYERS: Layer 1 = bulbospongiosus, ischiocavernosus, superficial transverse perineal, EAS. Layer 2 (UG diaphragm) = deep transverse perineal, sphincter urethrae, compressor urethrae. Layer 3 (pelvic diaphragm) = levator ani (puborectalis, pubococcygeus, iliococcygeus), coccygeus, external urethral sphincter. Internal urethral sphincter (smooth muscle, not PF) = at base of bladder above prostate; prevents retrograde ejaculation.
+
+NERVE SUPPLY: Pudendal nerve S2–4 = motor to PFM, sensory to perineum/genitalia. Parasympathetic S2–4 = erection ("point"). Sympathetic T11–L2 = ejaculation ("shoot"). Somatic pudendal = orgasmic contraction. Internal pudendal artery/vein = penile blood flow.
+
+PROSTATE CANCER: #1 cancer in men; 1 in 8 will develop it; median age 66. More common in BRCA2 mutation, African American, high animal diet/sedentary. Adenocarcinoma = most common. Prostatectomy: higher early SUI risk, nerve sparing reduces ED. XRT: more bowel dysfunction, delayed ED onset. PT post-prostatectomy: SUI (quick flicks + endurance training), scar management, core weakness. PT post-XRT: urgency/frequency, bowel symptoms, tissue stiffness.
+
+TESTICULAR CANCER: #1 cancer in men 15–35; germ cell tumors (seminoma vs non-seminoma). Risk: cryptorchidism, genetics, white, HIV. Chemo: BEP (bleomycin, etoposide, cisplatin).
+
+PROSTATITIS SUBTYPES: Acute bacterial, chronic bacterial, CP/CPPS (>90% of cases, negative cultures), asymptomatic inflammatory. CP/CPPS = chronic pain >3 months + urinary urgency + pain with ejaculation + CNS sensitization. Treatment: alpha-blockers (tamsulosin), CBT, PT, TENS, aerobic exercise.
+
+BPH: 50% of men >50; 90% by age 80. Treatment: alpha-blockers (tamsulosin), 5-alpha reductase inhibitors (finasteride), TURP, UroLift.
+
+HARD FLACCID: Constant semi-rigid penis at flaccid state + loss of erectile rigidity. Risk after traumatic event (aggressive masturbation, jelqing, vacuum). Ages 20–40. PT: behavioral modifications, PFM relaxation, low-intensity shockwave.
+
+PEYRONIE'S DISEASE: Fibrotic plaques in tunica albuginea → curved painful erections. 3–9% men aged 40–70. Treatment: oral pentoxifylline, collagenase injections, penile traction, surgery.
+
+PROSTATE TESTING: PSA normal <4.0 ng/mL. Free PSA <10% → higher cancer risk. DRE: hard nodule/asymmetry = cancer; uniform enlargement = BPH; tenderness = prostatitis. PHI and 4Kscore = combine PSA markers to estimate aggressive cancer risk.
+
+PUDENDAL NERVE ENTRAPMENT SITES: Between sacrotuberous and sacrospinous ligament; Alcock's canal (between OI and ischiorectal fossa); at ischial spine or obturator fascia. Symptoms: burning/numbness in penis/scrotum/perineum; worse sitting, improved standing.
+
+OUTCOME TOOLS: NIH-CPSI (0–43, gold standard for CP/CPPS); IPSS (0–35: mild 0–7, mod 8–19, severe 20–35); IIEF (0–75 higher = better); SHIM/IIEF-5 (1–25 higher = less severe); ICIQ-MLUTS; EPIC (prostate cancer).
+
+RED FLAGS FOR REFERRAL: Saddle anesthesia + urinary retention + bilateral leg weakness = CAUDA EQUINA (ER immediately). Sudden ED or priapism. Hematuria + unexplained weight loss + night sweats.
+
+=== PELVIC PAIN KNOWLEDGE BASE ===
+TAXONOMY:
+ORGAN-BASED: IBS (chronic abdominal pain + altered bowel habits; PT: bowel retraining, visceral mob, BFB), IC/PBS (urgency/frequency/suprapubic pain, negative cultures; PT: bladder retraining, downtraining, MFR; AVOID electrical stim directly to bladder), Endometriosis (ectopic endometrial tissue, cyclic pain, adhesions; PT: pain education, scar/adhesion mobility, PFM relaxation), Dysmenorrhea (prostaglandins primary; PT: TENS, posture, exercise).
+
+MSK-BASED: CPP >6 months, often multifactorial with central sensitization (PT: graded exposure, breathing, downtraining). Coccydynia (trauma, childbirth, sitting; PT: manual coccyx mob, posture, seating). PFM Tension Myalgia (overactive/tender PFMs; symptoms: pain sitting/sex/BM; PT: trigger point release, downtraining, BFB). Levator Ani Syndrome (dull aching rectal/pelvic pain, worse sitting; PT: manual therapy, relaxation). Vaginismus (involuntary vaginal spasm; PT: desensitization, dilators, relaxation, trauma-informed care). Anismus (inappropriate anal contraction during defecation → constipation).
+
+UNKNOWN ORIGIN: Vulvodynia (chronic vulvar burning/rawness without clear pathology; provoked vs spontaneous; PT: desensitization, downtraining, graded exposure). Pudendal Neuralgia (neuropathic pain along pudendal nerve; worse sitting, improved standing/toilet sitting; PT: neural mobilization, posture, avoid prolonged sitting). Proctalgia Fugax (sudden severe anorectal pain seconds–minutes, idiopathic; likely sphincter spasm or pudendal irritation; PT: reassurance, relaxation).
+
+PATHOKINESIOLOGY: Pain → movement change → protective guarding → PF/hip flexors/deep stabilizers hyperactive → central sensitization → amplified pain/spread/persistence. IAP role: overloaded tissue, nerve irritation, maladaptive muscle cycles.
+
+PAIN PHYSIOLOGY: Hyperalgesia = increased response to noxious stimuli. Allodynia = pain from non-noxious stimuli. Central sensitization = persistent nociceptive input → spinal cord hyperexcitability → amplification/spread/persistence beyond tissue healing.
+
+BIOFEEDBACK PARAMETERS: Who NEEDS BFB = unsteady baseline, delayed PFM recruitment, poor relaxation with contraction. Who does NOT need BFB = steady baseline + appropriate control. Therapist should remain in room during full session.
+
+TENS PARAMETERS: 80–120 Hz = acute pain; 2–10 Hz = chronic pain (endorphin release); 35–50 Hz = muscle stimulation. Pulse width 175–200 μs for pain relief. Duration: 20–60 min/day acute; 20–30 min/day chronic. Up to 4×/day acute; up to 5×/week chronic. Can place electrodes lateral to each ischial tuberosity for perineal pain.
+
+SUPERFICIAL DYSPAREUNIA CAUSES: Dermatologic (lichen, psoriasis), inadequate lubrication, local infection, vaginitis, vaginal atrophy, vaginismus, vulvodynia, PFM dysfunction.
+DEEP DYSPAREUNIA CAUSES: Endometriosis, pelvic adhesions, pelvic congestion syndrome, IC, levator ani myalgia, uterine retroversion, myomas, adenomyosis, PID, ovarian conditions, IBS.
+
+SIJ SPECIAL TESTS: FABER, compression, distraction, thigh thrust, Gaenslen's. Pelvic belt reduces SIJ displacement, decreases sacrotuberous/sacrospinous/PSL/ISL loading; padded belts more effective than rubber belts. ACTIVE STRAIGHT LEG RAISE (ASLR) = key test for PGP/SIJ dysfunction and load transfer.
+
+CONTRACT-RELAX MECHANISMS: (1) Autogenic inhibition via GTO → 1b afferents → inhibit homonymous motoneuron. (2) Motor learning → corticospinal excitability. (3) Motor cortex activation inhibits thalamic nuclei → periaqueductal gray → endogenous opioid release.
+
+=== PELVIC ORGAN PROLAPSE KNOWLEDGE BASE ===
+TYPES: Anterior (cystocele = bladder, urethrocele = urethra, cystourethrocele = both; MOST COMMON). Middle/apical (uterine prolapse graded I–IV; vaginal vault prolapse post-hysterectomy). Posterior (rectocele = rectum into posterior wall; enterocele = small bowel/peritoneum).
+
+PREVALENCE: 43–92% of women on routine exam; postmenopausal 86–98% (many asymptomatic). Clinically significant (beyond hymen) = 3–10%. Annual incidence ~26%, spontaneous resolution ~21%. POP surgery lifetime risk ~12.6%.
+
+RISK FACTORS: Age (40% increase per decade). Childbirth = strongest risk factor; ≥4 vaginal deliveries = 11× risk vs nulliparous. Levator ani avulsion present in 55% of women with prolapse later; OR 7.3. Anterior prolapse = 2× more common than posterior; 3× more than apical. 67–71% of descent explained by apical loss.
+
+POP-Q SYSTEM: 6 vaginal points + GH + PB + TVL. Aa/Ap = 3 cm inside hymen (range −3 to +3). Ba = most distal anterior wall (between Aa and apex). Bp = most distal posterior wall. C = cervix or cuff. D = posterior fornix (omit if hysterectomy). GH = urethral meatus to posterior hymen (normal 2–3 cm). PB = posterior hymen to mid-anus (normal 3–4 cm). TVL = total vaginal length (normal 8–10 cm). GH + PB >7 cm = excessive levator hiatal ballooning. GH + PB ≥8.5 cm = levator avulsion risk.
+
+POP-Q STAGING: 0 = no prolapse. I = >1 cm above hymen. II = within 1 cm of hymen. III = >1 cm below hymen, but not complete eversion. IV = complete eversion (≥TVL − 2 cm).
+
+IAP AND POP: Chronic high IAP (chronic cough, heavy lifting, obesity, constipation, pregnancy) overloads pelvic supports. "Blow before you go" = exhale on exertion. Diaphragm-PFM synergy = optimal pressure distribution. Posterior pelvic tilt worsens rectocele. Forward head + kyphosis worsens cystocele.
+
+PFMT FOR POP: FIRST-LINE conservative treatment. Protocol: 8–12 reps × 3 sets/day, 6–10 sec holds + quick flicks. Progression: supine → sitting → standing → functional tasks. "Knack" = pre-contract before cough/sneeze. Evidence: ~19–45% improve ≥1 POP-Q stage. PFMT > watchful waiting, lifestyle advice, hypopressive techniques. Effect size ~0.9. Most effective Stage I–III without prior surgery.
+
+PESSARY: First-line conservative management per ICI. Ring pessary = first choice. 58–97% fitting success. ~60–80% retain at 1 year. Success predictors: shorter TVL <7.3 cm and levator avulsion → LESS success. Complications: discharge, bleeding, erosion, fistula (rare if neglected). Follow-up: remove at least annually.
+
+SURGICAL OPTIONS: Sacrocolpopexy = gold standard for apical prolapse (mesh to sacrum). Anterior colporrhaphy = cystocele repair. Posterior colporrhaphy = rectocele repair. Uterosacral ligament suspension; sacrospinous ligament fixation. Colpocleisis = obliterative (closes vaginal canal; for women not desiring intercourse). Hysterectomy often combined but NOT shown to improve outcomes over hysteropexy in all cases. If apical not addressed with cystocele/rectocele repair = 17% need 2nd surgery within 10 years. 40% of women develop SUI after prolapse surgery.
+
+BIRTH INJURY: Levator hiatus enlarges up to 29% in 3rd trimester. LA must stretch >300% during delivery. LA defect in 19% of primiparous vaginal deliveries. LA avulsion present in 55% of women with prolapse (OR 7.3). Risk factors: forceps, occiput posterior, older maternal age, long 2nd stage, birthweight >4000 g. OASI risk factors: birthweight ≥4 kg, occiput posterior, nulliparity, induction, epidural, second stage >1 hour, shoulder dystocia, midline episiotomy, forceps (up to 7%).
+
+OASI CLASSIFICATION: 1st degree = skin/mucosa. 2nd degree = perineal muscles (not sphincter). 3rd degree: 3a = <50% EAS thickness; 3b = >50% EAS thickness; 3c = EAS + IAS. 4th degree = EAS + IAS + anorectal mucosa. Prognosis: 60–80% asymptomatic at 12 months. Recurrence risk 6–8%.
+
+ANTENATAL PERINEAL MASSAGE (APM): From 34th week; ≥10 min, ≥2×/week. Reduces episiotomy risk, perineal pain, FI, dyspareunia in 1st-time deliveries. Does NOT consistently reduce UI. More effective in nulliparous. Self-massage is effective.
+
+PREGNANCY-RELATED POP CHANGES: Significant descent from 2nd to 3rd trimester despite no change in PFM strength. C-section NOT fully protective (pregnancy itself, not just delivery, contributes). Relaxin + hormonal changes alter connective tissue remodeling. LOXL1, fibulin-3, fibulin-5 pathway dysfunction → abnormal ECM remodeling → POP.
+
+=== ETHICS & PROFESSIONAL PRACTICE ===
+APTA CODE OF ETHICS — 8 PRINCIPLES:
+1. Beneficence — respect dignity/rights of all patients
+2. Beneficence — be trustworthy and compassionate
+3. Integrity — accountable for sound professional judgments
+4. Integrity — demonstrate integrity in all professional relationships
+5. Veracity — fulfill legal and professional obligations
+6. Nonmaleficence — enhance safety, reduce risk, minimize harm
+7. Nonmaleficence — prevent fraud and abuse in organizational/business practices
+8. Justice — participate in meeting health needs locally, nationally, globally
+
+INFORMED CONSENT: Must obtain BEFORE examination or intervention, especially internal pelvic exam. Patient must understand risks, benefits, alternatives. Must be documented. Offer chaperone for internal exams.
+
+MANDATORY REPORTING: PTs are mandated reporters in most states. Must report known or suspected abuse (child, elder, domestic violence, sexual). Failure to report = legal AND ethical violation.
+
+BOUNDARIES: Any sexual misconduct = license revocation. Dual relationships that impair objectivity (treating family, romantic relationships with patients) must be avoided. Financial conflicts of interest must be disclosed.
+
+SCOPE OF PRACTICE: Delegate to PTAs only tasks within their scope. PT aides cannot perform skilled PT. Supervising PT retains responsibility for outcomes. Inappropriate delegation = ethical + legal violation. PT must practice only within own competency; practicing beyond competency = ethical violation.
+
+DOCUMENTATION: Must accurately reflect services provided and support medical necessity. Falsifying documentation = fraud. Billing for services not rendered = Medicare/Medicaid fraud.
+
+CULTURAL COMPETENCE: Sensitivity to cultural differences in sexual practices, gender roles, religious beliefs, and life transitions. Care must be modified without compromising clinical standards.
+
+HIPAA/CONFIDENTIALITY: PHI cannot be shared without consent except: mandatory reporting, court order, public safety. HIPAA Privacy Rule applies to all patient health information.
+
+DIRECT ACCESS: State practice acts govern direct access. PT must screen appropriately and refer when findings are outside PT scope.
+
+INTERPROFESSIONAL COLLABORATION: Ethical obligation to communicate/collaborate and make appropriate referrals. Research on patients includes obligation for IRB approval and ethical data handling.
+
+=== CLINICAL DOMAINS ADDITIONAL ===
+URINARY DYSFUNCTION: SUI = involuntary leakage with effort/exertion/cough/sneeze (urethral hypermobility or ISD). UUI = involuntary leakage with or immediately preceded by urgency (detrusor overactivity). Mixed = both. OAB = urgency ± frequency ± nocturia ± urgency incontinence. Overflow = bladder not emptying completely (impaired detrusor or outlet obstruction). PFMT = first-line for SUI and UUI. Bladder training = first-line for OAB/UUI. Biofeedback enhances PFMT outcomes. Beta-3 agonists (mirabegron) and antimuscarinics (oxybutynin, tolterodine) = pharmacological OAB treatment. Urodynamics includes cystometry (filling), uroflowmetry (voiding), PVR (residual). CISC (clean intermittent self-catheterization) for urinary retention.
+
+FEMALE ATHLETE / RED-S: Relative Energy Deficiency in Sport. Originally Female Athlete Triad (disordered eating + menstrual dysfunction + low bone density). RED-S = expanded model includes 9 health consequences. LEAP tool = screening for disordered eating in athletes. Bone stress injury (stress reaction → stress fracture) from low energy availability. Amenorrhea in athletes = low estrogen → bone loss. Return to sport: address energy availability FIRST.
+
+BONE HEALTH: DEXA = gold standard for bone mineral density. T-score: normal ≥ −1.0; osteopenia −1.0 to −2.5; osteoporosis ≤ −2.5; severe/established ≤ −2.5 + fragility fracture. FRAX = 10-year fracture risk tool. Pharmacology: bisphosphonates (alendronate, risedronate) = first-line; denosumab (RANKL inhibitor); raloxifene (SERM); teriparatide (PTH analog) = anabolic for severe cases. Exercise: weight-bearing + resistance training = most effective for bone. Falls prevention = multi-component programs.
+
+MENOPAUSE / GSM: GSM = genitourinary syndrome of menopause; hypoestrogenism → vaginal dryness, thinning, pH rise from acidic (3.5–4.5) to neutral/alkaline (>5), loss of rugae, decreased elasticity, dyspareunia, recurrent UTIs. First-line local topical estrogen (cream, ring, tablet); systemic HRT for severe systemic symptoms; NAMS 2022 = hormone therapy benefits outweigh risks for most healthy women <60 or within 10 years of menopause. GSM in breast cancer survivors: vaginal moisturizers, lubricants preferred; low-dose local estrogen may be considered with oncologist input.
+
+PREGNANCY / PGP: ASLR test = key for PGP/SIJ (positive = difficulty lifting leg, improved with pelvic compression). P4 test = posterior pelvic pain provocation. SIJ compression belt improves postural stability in SIJD. Level A risk factors for PGP: prior PGP, BMI extremes, smoking, work dissatisfaction. RELAXIN peaks first trimester. CV changes: blood volume ↑30–50%, CO ↑30–50%. Supine hypotensive syndrome after 20 weeks (IVC compression). DVT risk elevated in pregnancy. Diastasis recti: inter-recti distance >2 cm at umbilicus. Labor positions: upright/lateral reduce perineal trauma. Epidural reduces mobility and pushing sensation. Perineal massage (from 34th week) = reduces episiotomy, 3rd/4th degree tears. WARM COMPRESSES during 2nd stage reduce OASI.
+
+RETURN FORMAT — JSON ONLY, NO PREAMBLE, NO MARKDOWN FENCES:
+{
+  "domain": "2-4 word domain label",
+  "case_vignette": "Full case narrative using the EXACT patient name provided. 2-5 sentences with age, PMH, presentation, objective findings.",
+  "question_stem": "The clinical question ending with a cue word like MOST, BEST, OPTIMAL, EXCEPT",
+  "options": ["Full sentence option A", "Full sentence option B", "Full sentence option C", "Full sentence option D"],
+  "correct_index": 0,
+  "explanation": "3-5 sentence explanation of why the correct answer is best and why key distractors are incorrect.",
+  "citation": "Specific reference: Author(s), title/guideline name, year if known"
+}`;
+
+// ═══════════════════════════════════════════════════════════════════════
+// APP STATE
+// ═══════════════════════════════════════════════════════════════════════
+const DOMAINS_MIXED = [
+  "Male pelvic floor and post-prostatectomy rehabilitation",
+  "Pelvic pain, IC/BPS, and endometriosis",
+  "Vulvodynia, vaginismus, and provoked vestibulodynia",
+  "Pelvic organ prolapse",
+  "Urinary dysfunction and incontinence",
+  "Bowel dysfunction and fecal incontinence",
+  "Female athlete issues and RED-S",
+  "Bone health and osteoporosis",
+  "Lymphedema and oncology",
+  "Pregnancy-related pain and pelvic girdle pain",
+  "Labor and postpartum",
+  "Menopause and fibromyalgia",
+  "APTA Code of Ethics, professional behavior, legal standards, informed consent, mandatory reporting, documentation, delegation, cultural competence, and scope of practice"
+];
+
+const TOTAL_Q = 5;
+const PRELOAD_COUNT = 3; // Show quiz after first 3 questions are ready
+
+let questions = [];       // Resolved question objects (may grow async)
+let pendingPromises = []; // Promises for each question slot
+let currentIdx = 0;
+let correctCount = 0, wrongCount = 0;
+let selectedOpt = null;
+let answered = false;
+let domainMap = {};
+let chosenTopic = "mixed";
+let usedDomains = [];
+let sessionNames = []; // Per-session shuffled names
+
+function setTopic(btn) {
+  document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  chosenTopic = btn.dataset.topic;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickDomain() {
+  if (chosenTopic !== "mixed") return chosenTopic;
+  const pool = DOMAINS_MIXED.filter(d => !usedDomains.includes(d));
+  const available = pool.length ? pool : DOMAINS_MIXED;
+  return available[Math.floor(Math.random() * available.length)];
+}
+
+function setStepState(idx, state) {
+  const el = document.getElementById(`step-${idx}`);
+  if (!el) return;
+  const icon = el.querySelector('.step-icon');
+  el.className = 'load-step ' + state;
+  if (state === 'active') {
+    icon.innerHTML = '<div class="step-mini-spin"></div>';
+  } else if (state === 'done') {
+    icon.innerHTML = '<span class="step-check">✓</span>';
+  } else {
+    icon.innerHTML = '<div class="step-dot"></div>';
+  }
+}
+
+async function generateQ(idx) {
+  const domain = pickDomain();
+  const patientName = sessionNames[idx] || getRandomName();
+  const userMsg = `Generate one WCS practice exam question about: ${domain}.
+Question number ${idx + 1} of ${TOTAL_Q}.
+Previously used domains this session: [${usedDomains.join('; ')}]
+The patient or clinician name for this question MUST be: ${patientName}
+Make this question DIFFERENT in clinical scenario and content from any previously described domain.
+Return ONLY the JSON object — no markdown, no preamble.`;
+
+  setStepState(idx, 'active');
+
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: SYSTEM,
+      messages: [{ role: "user", content: userMsg }]
+    })
+  });
+
+  if (!resp.ok) {
+    const t = await resp.text();
+    throw new Error(`API ${resp.status}: ${t.slice(0, 200)}`);
+  }
+
+  const data = await resp.json();
+  const raw = data.content.map(c => c.text || "").join("").trim();
+  const clean = raw.replace(/```json|```/g, "").trim();
+  const q = JSON.parse(clean);
+  usedDomains.push(q.domain);
+  setStepState(idx, 'done');
+  return q;
+}
+
+async function startExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('loading-screen').style.display = 'block';
+
+  // Reset state
+  questions = new Array(TOTAL_Q).fill(null);
+  pendingPromises = [];
+  currentIdx = 0; correctCount = 0; wrongCount = 0;
+  selectedOpt = null; answered = false; domainMap = {}; usedDomains = [];
+
+  // Shuffle a fresh pool of unique names for this session
+  sessionNames = shuffle([...PATIENT_NAMES]).slice(0, TOTAL_Q);
+
+  // Initialize step indicators
+  for (let i = 0; i < TOTAL_Q; i++) setStepState(i, 'pending');
+
+  try {
+    // Generate first PRELOAD_COUNT questions sequentially (one at a time)
+    // to avoid hitting concurrency rate limits
+    for (let i = 0; i < PRELOAD_COUNT; i++) {
+      const q = await generateQ(i);
+      questions[i] = q;
+    }
+
+    // First 3 ready — transition to quiz immediately
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    document.getElementById('chip-tot').textContent = TOTAL_Q;
+    updateChips();
+    updateBgStrip();
+    renderQ();
+
+    // Generate remaining questions sequentially in the background
+    // Small delay before starting to let the UI settle
+    (async () => {
+      for (let i = PRELOAD_COUNT; i < TOTAL_Q; i++) {
+        try {
+          await new Promise(r => setTimeout(r, 400)); // brief gap between calls
+          const q = await generateQ(i);
+          questions[i] = q;
+          updateBgStrip();
+        } catch (err) {
+          console.error(`Background Q${i + 1} error:`, err);
+          // Mark slot with an error placeholder so the poller can handle it
+          questions[i] = { _error: true, domain: 'Error', error: err.message };
+          updateBgStrip();
+        }
+      }
+    })();
+
+  } catch (err) {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('error-screen').style.display = 'block';
+    document.getElementById('err-txt').textContent = err.message || String(err);
+  }
+}
+
+function updateBgStrip() {
+  const strip = document.getElementById('bg-strip');
+  const remainingDone = questions.slice(PRELOAD_COUNT).every(q => q !== null);
+  if (remainingDone || currentIdx < PRELOAD_COUNT) {
+    strip.classList.remove('active');
+  } else {
+    const remaining = questions.slice(PRELOAD_COUNT).filter(q => q === null).length;
+    strip.classList.add('active');
+    document.getElementById('bg-strip-txt').textContent =
+      `Building ${remaining} remaining question${remaining !== 1 ? 's' : ''} in background…`;
+  }
+}
+
+function renderQ() {
+  const q = questions[currentIdx];
+  answered = false; selectedOpt = null;
+
+  document.getElementById('prog').style.width = ((currentIdx / TOTAL_Q) * 100) + '%';
+  document.getElementById('q-num-lbl').textContent = `Question ${currentIdx + 1}`;
+  document.getElementById('q-domain-lbl').textContent = q.domain;
+  document.getElementById('chip-n').textContent = currentIdx + 1;
+
+  // Case vignette
+  const vigEl = document.getElementById('case-vignette');
+  if (q.case_vignette && q.case_vignette.trim()) {
+    vigEl.innerHTML = `<div class="case-box"><span class="case-label">Clinical Vignette</span>${q.case_vignette}</div>`;
+  } else {
+    vigEl.innerHTML = '';
+  }
+
+  // Question stem — bold key cue words
+  const stemEl = document.getElementById('q-text');
+  const stemHtml = q.question_stem.replace(/\b(MOST|BEST|OPTIMAL|MOST LIKELY|MOST ACCURATE|EXCEPT|LEAST|FIRST)\b/g, '<strong>$1</strong>');
+  stemEl.innerHTML = stemHtml;
+
+  // Options
+  const wrap = document.getElementById('opts');
+  wrap.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options.forEach((txt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.dataset.i = i;
+    btn.innerHTML = `<span class="ltr">${letters[i]}</span><span>${txt}</span>`;
+    btn.onclick = () => pick(i, btn);
+    wrap.appendChild(btn);
+  });
+
+  // Reset feedback & buttons
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback'; fb.innerHTML = '';
+
+  document.getElementById('btn-sub').disabled = true;
+  document.getElementById('btn-sub').style.display = 'inline-block';
+  document.getElementById('btn-nxt').style.display = 'none';
+  document.getElementById('btn-nxt').disabled = false;
+
+  const card = document.getElementById('q-card');
+  card.style.animation = 'none'; void card.offsetWidth; card.style.animation = 'fadeUp 0.38s ease';
+
+  updateBgStrip();
+}
+
+function pick(idx, btn) {
+  if (answered) return;
+  document.querySelectorAll('.opt').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedOpt = idx;
+  document.getElementById('btn-sub').disabled = false;
+}
+
+function submitAnswer() {
+  if (selectedOpt === null || answered) return;
+  answered = true;
+
+  const q = questions[currentIdx];
+  const isRight = selectedOpt === q.correct_index;
+
+  document.querySelectorAll('.opt').forEach((btn, i) => {
+    btn.disabled = true;
+    btn.classList.remove('sel');
+    if (i === q.correct_index) btn.classList.add('right');
+    if (i === selectedOpt && !isRight) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('fb');
+  if (isRight) {
+    correctCount++;
+    fb.className = 'feedback fb-right';
+    fb.innerHTML = `<strong>✓ Correct!</strong>${q.explanation}<div class="fb-ref">📚 ${q.citation}</div>`;
+  } else {
+    wrongCount++;
+    fb.className = 'feedback fb-wrong';
+    fb.innerHTML = `<strong>✗ Incorrect.</strong>${q.explanation}<div class="fb-ref">📚 ${q.citation}</div>`;
+  }
+
+  if (!domainMap[q.domain]) domainMap[q.domain] = { c: 0, t: 0 };
+  domainMap[q.domain].t++;
+  if (isRight) domainMap[q.domain].c++;
+
+  updateChips();
+
+  document.getElementById('btn-sub').style.display = 'none';
+  const nxt = document.getElementById('btn-nxt');
+  nxt.style.display = 'inline-block';
+
+  const nextIdx = currentIdx + 1;
+  const isLast = nextIdx >= TOTAL_Q;
+
+  if (isLast) {
+    nxt.textContent = 'View Results →';
+    nxt.disabled = false;
+  } else if (questions[nextIdx] !== null) {
+    // Next question already ready
+    nxt.textContent = 'Next Question →';
+    nxt.disabled = false;
+  } else {
+    // Next question still loading — show waiting state
+    nxt.textContent = 'Loading next…';
+    nxt.disabled = true;
+    // Poll until it's ready
+    const poller = setInterval(() => {
+      if (questions[nextIdx] !== null) {
+        clearInterval(poller);
+        nxt.textContent = 'Next Question →';
+        nxt.disabled = false;
+        updateBgStrip();
+      }
+    }, 300);
+  }
+}
+
+function updateChips() {
+  const tot = correctCount + wrongCount;
+  document.getElementById('chip-c').textContent = correctCount;
+  document.getElementById('chip-w').textContent = wrongCount;
+  document.getElementById('chip-pct').textContent = tot > 0 ? Math.round((correctCount / tot) * 100) + '%' : '—';
+}
+
+function nextQ() {
+  currentIdx++;
+  if (currentIdx >= TOTAL_Q) {
+    showResults();
+  } else if (questions[currentIdx] && questions[currentIdx]._error) {
+    document.getElementById("quiz-screen").style.display = "none";
+    document.getElementById("error-screen").style.display = "block";
+    document.getElementById("err-txt").textContent = "A background question failed: " + (questions[currentIdx].error || "API error") + "\n\nPlease start a new session.";
+  } else {
+    renderQ();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+  document.getElementById('prog').style.width = '100%';
+
+  const tot = correctCount + wrongCount;
+  const pct = Math.round((correctCount / tot) * 100);
+  document.getElementById('r-pct').textContent = pct + '%';
+  document.getElementById('r-sub').textContent = `${tot} questions answered · ${correctCount} correct`;
+  document.getElementById('r-c').textContent = correctCount;
+  document.getElementById('r-w').textContent = wrongCount;
+  document.getElementById('r-t').textContent = tot;
+
+  const dw = document.getElementById('dom-wrap');
+  const entries = Object.entries(domainMap);
+  if (entries.length >= 2) {
+    dw.innerHTML = '<h3>Performance by Domain</h3>';
+    entries.forEach(([name, d]) => {
+      const dp = Math.round((d.c / d.t) * 100);
+      dw.innerHTML += `<div class="dom-row">
+        <div class="dom-name">${name}</div>
+        <div class="dom-bar-bg"><div class="dom-bar" style="width:${dp}%"></div></div>
+        <div class="dom-pct">${dp}%</div>
+      </div>`;
+    });
+  } else {
+    dw.innerHTML = '';
+  }
+}
+
+function goHome() {
+  ['results-screen', 'error-screen', 'quiz-screen', 'loading-screen'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('prog').style.width = '0%';
+  document.getElementById('start-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
