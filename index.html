@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.8</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.9</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -290,7 +290,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.8</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.9</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -760,7 +760,21 @@ Return ONLY the JSON object — no markdown, no preamble.`;
       q.correct_index = 0;
     }
   }
-  if (!q.question_stem) throw new Error('Malformed question — question_stem missing');
+  if (!q.question_stem) {
+    // Last-resort: scan all string fields to find something that looks like a question
+    const allKeys = Object.keys(q);
+    console.warn('question_stem missing. Full object keys:', allKeys, JSON.stringify(q).slice(0, 300));
+    const fallback = allKeys.find(k =>
+      typeof q[k] === 'string' && q[k].length > 20 &&
+      !['case_vignette','vignette','case','explanation','rationale','citation','reference','domain','topic'].includes(k)
+    );
+    if (fallback) {
+      console.warn(`Using fallback field "${fallback}" as question_stem`);
+      q.question_stem = q[fallback];
+    } else {
+      throw new Error('Malformed question — question_stem missing. Keys: ' + allKeys.join(', '));
+    }
+  }
   if (!q.explanation) q.explanation = '';
   if (!q.citation) q.citation = 'WCS Study Tool, 2025';
 
