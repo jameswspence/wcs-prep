@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.1</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -308,7 +308,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.1</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -651,6 +651,12 @@ const DOMAINS_MIXED = [
   "APTA Code of Ethics, professional behavior, legal standards, informed consent, mandatory reporting, documentation, delegation, cultural competence, and scope of practice"
 ];
 
+// ── PROXY URL ─────────────────────────────────────────────────────────
+// Replace with your deployed Cloudflare Worker URL after deployment.
+// Example: "https://wcs-prep.jameswspence.workers.dev/"
+const PROXY_URL = "https://wcs-prep.jameswspence.workers.dev/";
+// ─────────────────────────────────────────────────────────────────────
+
 const TOTAL_Q = 5;
 const PRELOAD_COUNT = 3; // Show quiz after first 3 questions are ready
 
@@ -713,7 +719,7 @@ Return ONLY the JSON object — no markdown, no preamble.`;
 
   setStepState(idx, 'active');
 
-  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+  const resp = await fetch(PROXY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
