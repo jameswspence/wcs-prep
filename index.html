@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.2</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.3</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -290,7 +290,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.2</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.3</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -735,18 +735,30 @@ async function startExam() {
     renderQ();
 
     // Generate remaining questions sequentially in the background
-    // Small delay before starting to let the UI settle
+    // Uses retry with exponential backoff to handle rate limits gracefully
     (async () => {
       for (let i = PRELOAD_COUNT; i < TOTAL_Q; i++) {
-        try {
-          await new Promise(r => setTimeout(r, 400)); // brief gap between calls
-          const q = await generateQ(i);
-          questions[i] = q;
-          updateBgStrip();
-        } catch (err) {
-          console.error(`Background Q${i + 1} error:`, err);
-          // Mark slot with an error placeholder so the poller can handle it
-          questions[i] = { _error: true, domain: 'Error', error: err.message };
+        await new Promise(r => setTimeout(r, 2000)); // 2s gap between background calls
+        let success = false;
+        for (let attempt = 1; attempt <= 4; attempt++) {
+          try {
+            const q = await generateQ(i);
+            questions[i] = q;
+            updateBgStrip();
+            success = true;
+            break;
+          } catch (err) {
+            console.warn(`Q${i + 1} attempt ${attempt} failed:`, err.message);
+            if (attempt < 4) {
+              // Exponential backoff: 3s, 6s, 12s
+              await new Promise(r => setTimeout(r, 3000 * attempt));
+            }
+          }
+        }
+        if (!success) {
+          // All retries exhausted — generate a fallback question on the fly when reached
+          console.error(`Q${i + 1} failed after 4 attempts — will retry on demand`);
+          questions[i] = { _retry: true };
           updateBgStrip();
         }
       }
@@ -879,9 +891,10 @@ function submitAnswer() {
     // Next question still loading — show waiting state
     nxt.textContent = 'Loading next…';
     nxt.disabled = true;
-    // Poll until it's ready
+    // Poll until it's ready (handles _retry placeholder too)
     const poller = setInterval(() => {
-      if (questions[nextIdx] !== null) {
+      const slot = questions[nextIdx];
+      if (slot !== null && !slot._retry) {
         clearInterval(poller);
         nxt.textContent = 'Next Question →';
         nxt.disabled = false;
@@ -898,17 +911,28 @@ function updateChips() {
   document.getElementById('chip-pct').textContent = tot > 0 ? Math.round((correctCount / tot) * 100) + '%' : '—';
 }
 
-function nextQ() {
+async function nextQ() {
   currentIdx++;
   if (currentIdx >= TOTAL_Q) {
     showResults();
-  } else if (questions[currentIdx] && questions[currentIdx]._error) {
-    document.getElementById("quiz-screen").style.display = "none";
-    document.getElementById("error-screen").style.display = "block";
-    document.getElementById("err-txt").textContent = "A background question failed: " + (questions[currentIdx].error || "API error") + "\n\nPlease start a new session.";
-  } else {
-    renderQ();
+    return;
   }
+  // If slot failed background generation, try one more time on demand
+  if (questions[currentIdx] && questions[currentIdx]._retry) {
+    const nxt = document.getElementById('btn-nxt');
+    nxt.textContent = 'Generating…';
+    nxt.disabled = true;
+    try {
+      const q = await generateQ(currentIdx);
+      questions[currentIdx] = q;
+    } catch (err) {
+      document.getElementById("quiz-screen").style.display = "none";
+      document.getElementById("error-screen").style.display = "block";
+      document.getElementById("err-txt").textContent = "Failed to generate question " + (currentIdx + 1) + " after multiple retries. Please start a new session.";
+      return;
+    }
+  }
+  renderQ();
 }
 
 function showResults() {
