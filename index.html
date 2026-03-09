@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.9</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.10</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -290,7 +290,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.9</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.10</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -722,18 +722,37 @@ Return ONLY the JSON object — no markdown, no preamble.`;
     throw new Error(`JSON parse failed: ${e.message}. Raw: ${clean.slice(0, 100)}`);
   }
 
+  // If model wrapped everything in a nested "question" object, unwrap it
+  if (q.question && typeof q.question === 'object' && !Array.isArray(q.question)) {
+    const inner = q.question;
+    Object.keys(inner).forEach(k => { if (!q[k]) q[k] = inner[k]; });
+  }
+
   // Normalize alternative field names the model sometimes uses
   if (!q.question_stem && q.question_text) q.question_stem = q.question_text;
   if (!q.question_stem && q.stem) q.question_stem = q.stem;
+  if (!q.question_stem && q.question && typeof q.question === 'string') q.question_stem = q.question;
   if (!q.case_vignette && q.vignette) q.case_vignette = q.vignette;
   if (!q.case_vignette && q.case) q.case_vignette = q.case;
   if (!q.case_vignette && q.clinical_scenario) q.case_vignette = q.clinical_scenario;
+  if (!q.case_vignette && q.scenario) q.case_vignette = q.scenario;
+  if (!q.case_vignette && q.patient_case) q.case_vignette = q.patient_case;
   if (!q.explanation && q.rationale) q.explanation = q.rationale;
   if (!q.explanation && q.answer_explanation) q.explanation = q.answer_explanation;
+  if (!q.explanation && q.discussion) q.explanation = q.discussion;
   if (!q.citation && q.reference) q.citation = q.reference;
-  if (!q.citation && q.source) q.citation = q.source;
+  if (!q.citation && q.source) q.citation = q.citation;
+  if (!q.citation && q.references) q.citation = Array.isArray(q.references) ? q.references.join('; ') : q.references;
   if (!q.domain && q.topic) q.domain = q.topic;
   if (!q.domain && q.category) q.domain = q.category;
+
+  // options: handle object format { A: "...", B: "...", C: "...", D: "..." }
+  // also handle nested answer_choices or choices
+  if (!Array.isArray(q.options)) {
+    if (q.answer_choices) q.options = q.answer_choices;
+    else if (q.choices) q.options = q.choices;
+    else if (q.answers) q.options = q.answers;
+  }
 
   // options: handle both array and object formats
   if (!Array.isArray(q.options)) {
@@ -748,7 +767,7 @@ Return ONLY the JSON object — no markdown, no preamble.`;
 
   // Validate after normalization
   if (!Array.isArray(q.options) || q.options.length < 4) {
-    throw new Error(`Malformed question — options missing or incomplete. Got: ${JSON.stringify(q).slice(0, 150)}`);
+    throw new Error(`Malformed question — options missing or incomplete. Keys: ${Object.keys(q).join(", ")}. Got: ${JSON.stringify(q).slice(0, 200)}`);
   }
   if (typeof q.correct_index !== 'number' || q.correct_index < 0 || q.correct_index > 3) {
     // Try to derive from correct_answer letter
