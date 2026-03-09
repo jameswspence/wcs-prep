@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.6</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.7</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -290,7 +290,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.6</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.7</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -929,14 +929,50 @@ function submitAnswer() {
     // Next question still loading — show waiting state
     nxt.textContent = 'Loading next…';
     nxt.disabled = true;
-    // Poll until it's ready (handles _retry placeholder too)
-    const poller = setInterval(() => {
+
+    // Poll until ready, with 45s timeout that triggers on-demand generation
+    const pollStart = Date.now();
+    const poller = setInterval(async () => {
       const slot = questions[nextIdx];
+
+      // Ready normally
       if (slot !== null && !slot._retry) {
         clearInterval(poller);
         nxt.textContent = 'Next Question →';
         nxt.disabled = false;
         updateBgStrip();
+        return;
+      }
+
+      // Timeout — background generation stalled, generate on demand
+      if (Date.now() - pollStart > 45000) {
+        clearInterval(poller);
+        nxt.textContent = 'Generating…';
+        try {
+          const q = await generateQ(nextIdx);
+          questions[nextIdx] = q;
+          nxt.textContent = 'Next Question →';
+          nxt.disabled = false;
+          updateBgStrip();
+        } catch (err) {
+          nxt.textContent = 'Retry →';
+          nxt.disabled = false;
+          nxt.onclick = async () => {
+            nxt.textContent = 'Generating…';
+            nxt.disabled = true;
+            try {
+              const q = await generateQ(nextIdx);
+              questions[nextIdx] = q;
+              nxt.textContent = 'Next Question →';
+              nxt.disabled = false;
+              nxt.onclick = nextQ; // restore
+            } catch (e) {
+              nxt.textContent = 'Skip →';
+              nxt.disabled = false;
+              nxt.onclick = () => { questions[nextIdx] = { _skip: true }; nextQ(); };
+            }
+          };
+        }
       }
     }, 300);
   }
@@ -955,8 +991,16 @@ async function nextQ() {
     showResults();
     return;
   }
-  // If slot failed background generation, try one more time on demand
-  if (questions[currentIdx] && questions[currentIdx]._retry) {
+  const slot = questions[currentIdx];
+
+  // Skip placeholder — advance to next
+  if (slot && slot._skip) {
+    nextQ();
+    return;
+  }
+
+  // Retry placeholder — generate on demand
+  if (slot && slot._retry) {
     const nxt = document.getElementById('btn-nxt');
     nxt.textContent = 'Generating…';
     nxt.disabled = true;
@@ -964,9 +1008,9 @@ async function nextQ() {
       const q = await generateQ(currentIdx);
       questions[currentIdx] = q;
     } catch (err) {
-      document.getElementById("quiz-screen").style.display = "none";
-      document.getElementById("error-screen").style.display = "block";
-      document.getElementById("err-txt").textContent = "Failed to generate question " + (currentIdx + 1) + " after multiple retries. Please start a new session.";
+      // Mark as skip and move on rather than crashing the session
+      questions[currentIdx] = { _skip: true };
+      nextQ();
       return;
     }
   }
