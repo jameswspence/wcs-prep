@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.5</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.6</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -290,7 +290,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.5</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.6</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -704,8 +704,31 @@ Return ONLY the JSON object — no markdown, no preamble.`;
 
   const data = await resp.json();
   const raw = data.content.map(c => c.text || "").join("").trim();
-  const clean = raw.replace(/```json|```/g, "").trim();
-  const q = JSON.parse(clean);
+
+  // Strip markdown fences and any leading/trailing non-JSON text
+  let clean = raw.replace(/```json|```/g, "").trim();
+  // If response has text before the JSON object, find the first {
+  const braceStart = clean.indexOf('{');
+  const braceEnd = clean.lastIndexOf('}');
+  if (braceStart > 0 || braceEnd < clean.length - 1) {
+    clean = clean.slice(braceStart, braceEnd + 1);
+  }
+
+  let q;
+  try {
+    q = JSON.parse(clean);
+  } catch (e) {
+    throw new Error(`JSON parse failed: ${e.message}. Raw: ${clean.slice(0, 100)}`);
+  }
+
+  // Validate required fields
+  if (!Array.isArray(q.options) || q.options.length < 4) {
+    throw new Error(`Malformed question — options missing or incomplete. Got: ${JSON.stringify(q).slice(0, 150)}`);
+  }
+  if (typeof q.correct_index !== 'number' || q.correct_index < 0 || q.correct_index > 3) {
+    q.correct_index = 0; // safe fallback
+  }
+  if (!q.question_stem) throw new Error('Malformed question — question_stem missing');
 
   // Randomize correct answer position client-side — model tends to favor B
   const correctText = q.options[q.correct_index];
@@ -713,7 +736,7 @@ Return ONLY the JSON object — no markdown, no preamble.`;
   q.correct_index = shuffledOptions.indexOf(correctText);
   q.options = shuffledOptions;
 
-  usedDomains.push(q.domain);
+  usedDomains.push(q.domain || 'General');
   return q;
 }
 
