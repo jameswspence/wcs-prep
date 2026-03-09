@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.1</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.2</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -158,24 +158,6 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   #loading-screen h2 { font-family:'Playfair Display',serif; font-size:1.35rem; color:var(--navy); margin-bottom:7px; }
   #loading-screen p { font-size:0.88rem; color:var(--text-mid); font-style:italic; }
-  .loading-steps { margin-top: 24px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto; }
-  .load-step {
-    display: flex; align-items: center; gap: 10px;
-    padding: 7px 0; font-size: 0.82rem; color: var(--text-mid);
-    border-bottom: 1px solid var(--border);
-    transition: color 0.3s;
-  }
-  .load-step:last-child { border-bottom: none; }
-  .step-icon { width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
-  .step-mini-spin {
-    width: 14px; height: 14px; border: 2px solid var(--cream-dark);
-    border-top-color: var(--gold); border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  .step-check { color: var(--green-right); font-size: 13px; font-weight: 700; }
-  .load-step.done { color: var(--green-right); }
-  .load-step.active { color: var(--navy); font-weight: 600; }
 
   /* Question card */
   .q-card {
@@ -308,7 +290,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.1</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.2</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -353,13 +335,6 @@
     <div class="spinner"></div>
     <h2>Building Your Exam</h2>
     <p>First questions ready in seconds — remaining build in background</p>
-    <div class="loading-steps" id="load-steps">
-      <div class="load-step" id="step-0"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 1</div>
-      <div class="load-step" id="step-1"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 2</div>
-      <div class="load-step" id="step-2"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 3</div>
-      <div class="load-step" id="step-3"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 4</div>
-      <div class="load-step" id="step-4"><div class="step-icon"><div class="step-dot"></div></div>Case vignette 5</div>
-    </div>
   </div>
 
   <!-- QUIZ -->
@@ -657,8 +632,8 @@ const DOMAINS_MIXED = [
 const PROXY_URL = "https://wcs-prep.jameswspence.workers.dev/";
 // ─────────────────────────────────────────────────────────────────────
 
-const TOTAL_Q = 5;
-const PRELOAD_COUNT = 3; // Show quiz after first 3 questions are ready
+const TOTAL_Q = 25;
+const PRELOAD_COUNT = 2; // Show quiz after first 2 questions are ready
 
 let questions = [];       // Resolved question objects (may grow async)
 let pendingPromises = []; // Promises for each question slot
@@ -693,19 +668,6 @@ function pickDomain() {
   return available[Math.floor(Math.random() * available.length)];
 }
 
-function setStepState(idx, state) {
-  const el = document.getElementById(`step-${idx}`);
-  if (!el) return;
-  const icon = el.querySelector('.step-icon');
-  el.className = 'load-step ' + state;
-  if (state === 'active') {
-    icon.innerHTML = '<div class="step-mini-spin"></div>';
-  } else if (state === 'done') {
-    icon.innerHTML = '<span class="step-check">✓</span>';
-  } else {
-    icon.innerHTML = '<div class="step-dot"></div>';
-  }
-}
 
 async function generateQ(idx) {
   const domain = pickDomain();
@@ -717,7 +679,6 @@ The patient or clinician name for this question MUST be: ${patientName}
 Make this question DIFFERENT in clinical scenario and content from any previously described domain.
 Return ONLY the JSON object — no markdown, no preamble.`;
 
-  setStepState(idx, 'active');
 
   const resp = await fetch(PROXY_URL, {
     method: "POST",
@@ -740,7 +701,6 @@ Return ONLY the JSON object — no markdown, no preamble.`;
   const clean = raw.replace(/```json|```/g, "").trim();
   const q = JSON.parse(clean);
   usedDomains.push(q.domain);
-  setStepState(idx, 'done');
   return q;
 }
 
@@ -757,8 +717,6 @@ async function startExam() {
   // Shuffle a fresh pool of unique names for this session
   sessionNames = shuffle([...PATIENT_NAMES]).slice(0, TOTAL_Q);
 
-  // Initialize step indicators
-  for (let i = 0; i < TOTAL_Q; i++) setStepState(i, 'pending');
 
   try {
     // Generate first PRELOAD_COUNT questions sequentially (one at a time)
