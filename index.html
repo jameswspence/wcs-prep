@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.4</title>
+<title>WCS Practice Exam — Pelvic & Women's Health PT · v5.5</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap');
 
@@ -290,7 +290,7 @@
 <header>
   <div class="header-circle"></div>
   <div class="header-inner">
-    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.4</div>
+    <div class="header-badge">ABPTS Board Prep · AI-Powered · v5.5</div>
     <h1>Women's Health Clinical Specialist</h1>
     <p>Pelvic &amp; Women's Health Physical Therapy · Practice Examination</p>
   </div>
@@ -425,16 +425,16 @@ function getRandomName() {
 // ═══════════════════════════════════════════════════════════════════════
 // ENRICHED SYSTEM PROMPT — v5 with full Drive content
 // ═══════════════════════════════════════════════════════════════════════
-const SYSTEM = `You are an expert question writer for the ABPTS Women's Health Clinical Specialist (WCS) board examination. You create board-style practice questions that exactly match the format and difficulty of the 2025 WCS Study Tool (Hersick et al., First Edition 2025).
+const SYSTEM_BASE = `You are an expert question writer for the ABPTS Women's Health Clinical Specialist (WCS) board examination. You create board-style practice questions that exactly match the format and difficulty of the 2025 WCS Study Tool (Hersick et al., First Edition 2025).
 
 QUESTION FORMAT — FOLLOW EXACTLY:
 - Start with a realistic CASE VIGNETTE (2-5 sentences). The patient name will be provided to you — USE IT EXACTLY as given. Include age, relevant PMH, presentation, functional complaints, and objective findings as appropriate.
 - Then ask a focused clinical question about the case. The question stem should end with a bold-formatted cue word like MOST, BEST, OPTIMAL, MOST LIKELY, MOST ACCURATE, or EXCEPT.
 - Write exactly 4 answer options (A, B, C, D). Options should be full clinical sentences — not just one-word answers. Make 3 distractors plausible; one should be "almost correct" to test fine clinical discrimination.
-- The correct answer should vary position across questions (A, B, C, or D).
+- The correct answer should vary position across questions (A, B, C, or D).`;
 
-=== BOWEL DYSFUNCTION KNOWLEDGE BASE ===
-ANATOMY: Rectum 15–20 cm from S3 to 2.5 cm below coccyx tip. Valves of Houston (superior, middle, inferior rectal folds). IAS = inner circular smooth muscle; provides 55% resting anal tone; innervated sympathetically L1–2 (hypogastric plexus) and parasympathetically S1–3 (pelvic plexus). EAS + puborectalis = 30% resting tone. Hemorrhoid plexus = 15%. Anorectal angle at rest = 90°; range 60–105°. Pectinate line = 1.5–2 cm above anal verge. Anoderm = highly sensitive, innervated by inferior rectal nerve.
+const DOMAIN_KB = {
+  'bowel': `ANATOMY: Rectum 15–20 cm from S3 to 2.5 cm below coccyx tip. Valves of Houston (superior, middle, inferior rectal folds). IAS = inner circular smooth muscle; provides 55% resting anal tone; innervated sympathetically L1–2 (hypogastric plexus) and parasympathetically S1–3 (pelvic plexus). EAS + puborectalis = 30% resting tone. Hemorrhoid plexus = 15%. Anorectal angle at rest = 90°; range 60–105°. Pectinate line = 1.5–2 cm above anal verge. Anoderm = highly sensitive, innervated by inferior rectal nerve.
 
 NERVE SUPPLY: Onuf's nucleus S1–S3 controls striated sphincter. Pudendal nerve S2–4 provides somatic supply. Sympathetics L1–3 via superior hypogastric plexus = speed/slow motility, facilitate sphincters. Parasympathetics S2–S4 via inferior hypogastric plexus = rest/digest, inhibitory (relax sphincters for defecation), facilitatory (propel stool). Pudendal nerve stretch threshold for damage = 15%; vaginal delivery stretches inferior rectal branches 35%, perineal branch 33%.
 
@@ -454,10 +454,8 @@ GI TESTING: Anal manometry = resting/squeeze pressures, RAIR, identifies dyssyne
 
 PHARMACOLOGY: Bulking agents (psyllium), stool softeners (docusate), osmotic (PEG, Mg hydroxide), stimulants (senna, bisacodyl), antidiarrheal (loperamide). IBS-C: secretagogues (linaclotide, lubiprostone). IBS-D: rifaximin, bile acid binders. Antispasmodics (dicyclomine) for global IBS.
 
-OUTCOME TOOLS: Cleveland Clinic Constipation Score; Wexner Incontinence Score; IBS-QoL; Bristol Stool Form Scale; Patient diaries. Rome III/IV criteria for IBS diagnosis.
-
-=== LYMPHEDEMA KNOWLEDGE BASE ===
-ANATOMY: Lymphatic capillaries → pre-collectors → collectors (lymphangions with smooth muscle & valves) → lymph nodes (600–700 in adult) → trunks → major ducts → venous return. 2–4 liters return to circulation per 24 hours. Functional reserve: LTV can increase up to 10× normal.
+OUTCOME TOOLS: Cleveland Clinic Constipation Score; Wexner Incontinence Score; IBS-QoL; Bristol Stool Form Scale; Patient diaries. Rome III/IV criteria for IBS diagnosis.`,
+  'lymphedema': `ANATOMY: Lymphatic capillaries → pre-collectors → collectors (lymphangions with smooth muscle & valves) → lymph nodes (600–700 in adult) → trunks → major ducts → venous return. 2–4 liters return to circulation per 24 hours. Functional reserve: LTV can increase up to 10× normal.
 
 INSUFFICIENCY TYPES: Dynamic (high volume) = lymphatic load exceeds capacity (trauma, inflammation). Mechanical (low volume) = decreased transit capacity below normal load = LYMPHEDEMA. Combined = most severe; capacity below normal AND fluid volume elevated.
 
@@ -479,10 +477,8 @@ MLD: Begin proximally then progress distally. Increases lymph pumping from 6–1
 
 MEDICATIONS: Diuretics = INEFFECTIVE for lymphedema swelling. Coumadin (benzopyrone) = NOT recommended (liver toxicity). Emollients for hyperkeratosis. Antimicrobials for cellulitis.
 
-OUTCOME TOOLS: LLIS (Lymphedema Life Impact Scale) = 18-item; MCID = 7.31 points; target 8-point decrease. Lymph-ICF-LL for lower extremity. EORTC QLQ-C30 and FACT-HN for head/neck lymphedema.
-
-=== MALE PELVIC FLOOR KNOWLEDGE BASE ===
-ANATOMY — LAYERS: Layer 1 = bulbospongiosus, ischiocavernosus, superficial transverse perineal, EAS. Layer 2 (UG diaphragm) = deep transverse perineal, sphincter urethrae, compressor urethrae. Layer 3 (pelvic diaphragm) = levator ani (puborectalis, pubococcygeus, iliococcygeus), coccygeus, external urethral sphincter. Internal urethral sphincter (smooth muscle, not PF) = at base of bladder above prostate; prevents retrograde ejaculation.
+OUTCOME TOOLS: LLIS (Lymphedema Life Impact Scale) = 18-item; MCID = 7.31 points; target 8-point decrease. Lymph-ICF-LL for lower extremity. EORTC QLQ-C30 and FACT-HN for head/neck lymphedema.`,
+  'male': `ANATOMY — LAYERS: Layer 1 = bulbospongiosus, ischiocavernosus, superficial transverse perineal, EAS. Layer 2 (UG diaphragm) = deep transverse perineal, sphincter urethrae, compressor urethrae. Layer 3 (pelvic diaphragm) = levator ani (puborectalis, pubococcygeus, iliococcygeus), coccygeus, external urethral sphincter. Internal urethral sphincter (smooth muscle, not PF) = at base of bladder above prostate; prevents retrograde ejaculation.
 
 NERVE SUPPLY: Pudendal nerve S2–4 = motor to PFM, sensory to perineum/genitalia. Parasympathetic S2–4 = erection ("point"). Sympathetic T11–L2 = ejaculation ("shoot"). Somatic pudendal = orgasmic contraction. Internal pudendal artery/vein = penile blood flow.
 
@@ -504,10 +500,8 @@ PUDENDAL NERVE ENTRAPMENT SITES: Between sacrotuberous and sacrospinous ligament
 
 OUTCOME TOOLS: NIH-CPSI (0–43, gold standard for CP/CPPS); IPSS (0–35: mild 0–7, mod 8–19, severe 20–35); IIEF (0–75 higher = better); SHIM/IIEF-5 (1–25 higher = less severe); ICIQ-MLUTS; EPIC (prostate cancer).
 
-RED FLAGS FOR REFERRAL: Saddle anesthesia + urinary retention + bilateral leg weakness = CAUDA EQUINA (ER immediately). Sudden ED or priapism. Hematuria + unexplained weight loss + night sweats.
-
-=== PELVIC PAIN KNOWLEDGE BASE ===
-TAXONOMY:
+RED FLAGS FOR REFERRAL: Saddle anesthesia + urinary retention + bilateral leg weakness = CAUDA EQUINA (ER immediately). Sudden ED or priapism. Hematuria + unexplained weight loss + night sweats.`,
+  'pain': `TAXONOMY:
 ORGAN-BASED: IBS (chronic abdominal pain + altered bowel habits; PT: bowel retraining, visceral mob, BFB), IC/PBS (urgency/frequency/suprapubic pain, negative cultures; PT: bladder retraining, downtraining, MFR; AVOID electrical stim directly to bladder), Endometriosis (ectopic endometrial tissue, cyclic pain, adhesions; PT: pain education, scar/adhesion mobility, PFM relaxation), Dysmenorrhea (prostaglandins primary; PT: TENS, posture, exercise).
 
 MSK-BASED: CPP >6 months, often multifactorial with central sensitization (PT: graded exposure, breathing, downtraining). Coccydynia (trauma, childbirth, sitting; PT: manual coccyx mob, posture, seating). PFM Tension Myalgia (overactive/tender PFMs; symptoms: pain sitting/sex/BM; PT: trigger point release, downtraining, BFB). Levator Ani Syndrome (dull aching rectal/pelvic pain, worse sitting; PT: manual therapy, relaxation). Vaginismus (involuntary vaginal spasm; PT: desensitization, dilators, relaxation, trauma-informed care). Anismus (inappropriate anal contraction during defecation → constipation).
@@ -527,10 +521,8 @@ DEEP DYSPAREUNIA CAUSES: Endometriosis, pelvic adhesions, pelvic congestion synd
 
 SIJ SPECIAL TESTS: FABER, compression, distraction, thigh thrust, Gaenslen's. Pelvic belt reduces SIJ displacement, decreases sacrotuberous/sacrospinous/PSL/ISL loading; padded belts more effective than rubber belts. ACTIVE STRAIGHT LEG RAISE (ASLR) = key test for PGP/SIJ dysfunction and load transfer.
 
-CONTRACT-RELAX MECHANISMS: (1) Autogenic inhibition via GTO → 1b afferents → inhibit homonymous motoneuron. (2) Motor learning → corticospinal excitability. (3) Motor cortex activation inhibits thalamic nuclei → periaqueductal gray → endogenous opioid release.
-
-=== PELVIC ORGAN PROLAPSE KNOWLEDGE BASE ===
-TYPES: Anterior (cystocele = bladder, urethrocele = urethra, cystourethrocele = both; MOST COMMON). Middle/apical (uterine prolapse graded I–IV; vaginal vault prolapse post-hysterectomy). Posterior (rectocele = rectum into posterior wall; enterocele = small bowel/peritoneum).
+CONTRACT-RELAX MECHANISMS: (1) Autogenic inhibition via GTO → 1b afferents → inhibit homonymous motoneuron. (2) Motor learning → corticospinal excitability. (3) Motor cortex activation inhibits thalamic nuclei → periaqueductal gray → endogenous opioid release.`,
+  'prolapse': `TYPES: Anterior (cystocele = bladder, urethrocele = urethra, cystourethrocele = both; MOST COMMON). Middle/apical (uterine prolapse graded I–IV; vaginal vault prolapse post-hysterectomy). Posterior (rectocele = rectum into posterior wall; enterocele = small bowel/peritoneum).
 
 PREVALENCE: 43–92% of women on routine exam; postmenopausal 86–98% (many asymptomatic). Clinically significant (beyond hymen) = 3–10%. Annual incidence ~26%, spontaneous resolution ~21%. POP surgery lifetime risk ~12.6%.
 
@@ -554,10 +546,8 @@ OASI CLASSIFICATION: 1st degree = skin/mucosa. 2nd degree = perineal muscles (no
 
 ANTENATAL PERINEAL MASSAGE (APM): From 34th week; ≥10 min, ≥2×/week. Reduces episiotomy risk, perineal pain, FI, dyspareunia in 1st-time deliveries. Does NOT consistently reduce UI. More effective in nulliparous. Self-massage is effective.
 
-PREGNANCY-RELATED POP CHANGES: Significant descent from 2nd to 3rd trimester despite no change in PFM strength. C-section NOT fully protective (pregnancy itself, not just delivery, contributes). Relaxin + hormonal changes alter connective tissue remodeling. LOXL1, fibulin-3, fibulin-5 pathway dysfunction → abnormal ECM remodeling → POP.
-
-=== ETHICS & PROFESSIONAL PRACTICE ===
-APTA CODE OF ETHICS — 8 PRINCIPLES:
+PREGNANCY-RELATED POP CHANGES: Significant descent from 2nd to 3rd trimester despite no change in PFM strength. C-section NOT fully protective (pregnancy itself, not just delivery, contributes). Relaxin + hormonal changes alter connective tissue remodeling. LOXL1, fibulin-3, fibulin-5 pathway dysfunction → abnormal ECM remodeling → POP.`,
+  'ethics': `APTA CODE OF ETHICS — 8 PRINCIPLES:
 1. Beneficence — respect dignity/rights of all patients
 2. Beneficence — be trustworthy and compassionate
 3. Integrity — accountable for sound professional judgments
@@ -583,10 +573,8 @@ HIPAA/CONFIDENTIALITY: PHI cannot be shared without consent except: mandatory re
 
 DIRECT ACCESS: State practice acts govern direct access. PT must screen appropriately and refer when findings are outside PT scope.
 
-INTERPROFESSIONAL COLLABORATION: Ethical obligation to communicate/collaborate and make appropriate referrals. Research on patients includes obligation for IRB approval and ethical data handling.
-
-=== CLINICAL DOMAINS ADDITIONAL ===
-URINARY DYSFUNCTION: SUI = involuntary leakage with effort/exertion/cough/sneeze (urethral hypermobility or ISD). UUI = involuntary leakage with or immediately preceded by urgency (detrusor overactivity). Mixed = both. OAB = urgency ± frequency ± nocturia ± urgency incontinence. Overflow = bladder not emptying completely (impaired detrusor or outlet obstruction). PFMT = first-line for SUI and UUI. Bladder training = first-line for OAB/UUI. Biofeedback enhances PFMT outcomes. Beta-3 agonists (mirabegron) and antimuscarinics (oxybutynin, tolterodine) = pharmacological OAB treatment. Urodynamics includes cystometry (filling), uroflowmetry (voiding), PVR (residual). CISC (clean intermittent self-catheterization) for urinary retention.
+INTERPROFESSIONAL COLLABORATION: Ethical obligation to communicate/collaborate and make appropriate referrals. Research on patients includes obligation for IRB approval and ethical data handling.`,
+  'clinical': `URINARY DYSFUNCTION: SUI = involuntary leakage with effort/exertion/cough/sneeze (urethral hypermobility or ISD). UUI = involuntary leakage with or immediately preceded by urgency (detrusor overactivity). Mixed = both. OAB = urgency ± frequency ± nocturia ± urgency incontinence. Overflow = bladder not emptying completely (impaired detrusor or outlet obstruction). PFMT = first-line for SUI and UUI. Bladder training = first-line for OAB/UUI. Biofeedback enhances PFMT outcomes. Beta-3 agonists (mirabegron) and antimuscarinics (oxybutynin, tolterodine) = pharmacological OAB treatment. Urodynamics includes cystometry (filling), uroflowmetry (voiding), PVR (residual). CISC (clean intermittent self-catheterization) for urinary retention.
 
 FEMALE ATHLETE / RED-S: Relative Energy Deficiency in Sport. Originally Female Athlete Triad (disordered eating + menstrual dysfunction + low bone density). RED-S = expanded model includes 9 health consequences. LEAP tool = screening for disordered eating in athletes. Bone stress injury (stress reaction → stress fracture) from low energy availability. Amenorrhea in athletes = low estrogen → bone loss. Return to sport: address energy availability FIRST.
 
@@ -605,7 +593,22 @@ RETURN FORMAT — JSON ONLY, NO PREAMBLE, NO MARKDOWN FENCES:
   "correct_index": 0,
   "explanation": "3-5 sentence explanation of why the correct answer is best and why key distractors are incorrect.",
   "citation": "Specific reference: Author(s), title/guideline name, year if known"
-}`;
+}`,
+};
+
+
+function getDomainKB(domain) {
+  const d = domain.toLowerCase();
+  if (d.includes('bowel') || d.includes('fecal')) return DOMAIN_KB.bowel;
+  if (d.includes('lymph') || d.includes('oncol')) return DOMAIN_KB.lymphedema;
+  if (d.includes('male') || d.includes('prostat') || d.includes('prostatect')) return DOMAIN_KB.male;
+  if (d.includes('pain') || d.includes('vulvodynia') || d.includes('vaginismus') || d.includes('ic/') || d.includes('endometriosis') || d.includes('dyspareunia') || d.includes('vestibulodynia')) return DOMAIN_KB.pain;
+  if (d.includes('prolapse') || d.includes('pop')) return DOMAIN_KB.prolapse;
+  if (d.includes('ethics') || d.includes('professional') || d.includes('legal') || d.includes('scope')) return DOMAIN_KB.ethics;
+  // urinary, female athlete, bone, menopause, pregnancy, labor — all in clinical additional
+  return DOMAIN_KB.clinical;
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════
 // APP STATE
@@ -680,13 +683,16 @@ Make this question DIFFERENT in clinical scenario and content from any previousl
 Return ONLY the JSON object — no markdown, no preamble.`;
 
 
+  const domainKB = getDomainKB(domain);
+  const systemPrompt = SYSTEM_BASE + "\n\n=== RELEVANT KNOWLEDGE BASE ===\n" + domainKB;
+
   const resp = await fetch(PROXY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1000,
-      system: SYSTEM,
+      system: systemPrompt,
       messages: [{ role: "user", content: userMsg }]
     })
   });
@@ -745,7 +751,7 @@ async function startExam() {
     // Uses retry with exponential backoff to handle rate limits gracefully
     (async () => {
       for (let i = PRELOAD_COUNT; i < TOTAL_Q; i++) {
-        await new Promise(r => setTimeout(r, 2000)); // 2s gap between background calls
+        await new Promise(r => setTimeout(r, 3000)); // 3s gap — ~1200 tokens/call, well under 30k TPM limit
         let success = false;
         for (let attempt = 1; attempt <= 4; attempt++) {
           try {
@@ -757,8 +763,10 @@ async function startExam() {
           } catch (err) {
             console.warn(`Q${i + 1} attempt ${attempt} failed:`, err.message);
             if (attempt < 4) {
-              // Exponential backoff: 3s, 6s, 12s
-              await new Promise(r => setTimeout(r, 3000 * attempt));
+              // On rate limit, wait longer: 20s, 35s, 50s
+              const waitMs = err.message.includes("429") ? 8000 + (attempt - 1) * 5000 : 3000 * attempt;
+              console.warn(`Waiting ${waitMs/1000}s before retry...`);
+              await new Promise(r => setTimeout(r, waitMs));
             }
           }
         }
